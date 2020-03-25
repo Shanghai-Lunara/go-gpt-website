@@ -1,14 +1,15 @@
 <template>
-    <test />
+    <home />
 </template>
 
 <script>
-import test from './components/test.vue'
+import home from './components/home.vue'
+// import test from './components/test.vue'
 
 export default {
   name: 'App',
   components: {
-    test
+    home
   }
 }
 </script>
