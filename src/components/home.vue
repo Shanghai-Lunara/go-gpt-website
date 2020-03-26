@@ -50,8 +50,9 @@
                   </a-timeline-item>
                 </a-timeline>
 
-                <div v-if="ftp_status == 3"> 
-                  <a-textarea
+                <div v-if="branch_status === 3">
+                  <div v-if="ftp_status == 2">
+                     <a-textarea
                     v-model="fileContent"
                     placeholder="file content"
                     :autoSize="{ minRows: 3, maxRows: 5 }"
@@ -59,6 +60,7 @@
                     id="text_content"
                   />
                   <a-button type="primary" id="set" @click="setContent" style="margin-left: 180px; margin-top: 10px;">确认修改</a-button>
+                  </div> 
                 </div>
               </a-col>
 
@@ -94,14 +96,14 @@
                         <a-button type="primary" id="search" @click="search" style="margin-left: 180px; margin-top: 10px;">搜索日志</a-button>
                       </a-tab-pane>
 
-                      <a-tab-pane tab="ftp文件读取" key="3">
+                      <!-- <a-tab-pane tab="ftp文件读取" key="3">
                         <a-input-search
                           placeholder="文件名"
                           @search="onSearch"
                           enterButton="读取"
                           size="default"
                         />
-                      </a-tab-pane>
+                      </a-tab-pane> -->
                     </a-tabs>
                   </div>
 
@@ -128,7 +130,7 @@
       </a-layout>
     </a-layout>
     <popout ref="dialog" @setGitpar="setGit" />
-    <drawer ref="shade" />
+    <drawer ref="shade" @setDrawer="onSearch" />
   </a-layout>
 </template>
 <script>
@@ -137,6 +139,7 @@
   import { TreeSelect } from 'ant-design-vue';
 
   import drawer from '../components/drawer';
+  import qs from 'qs';
 
   const SHOW_PARENT = TreeSelect.SHOW_PARENT;
 
@@ -311,6 +314,10 @@
         },
         setStatus(data) {
           this.branch_status = data;
+          if (data == 3) {
+            this.ftp_status = 1;
+          }
+
           if (data == 2) {
             this.pullSvnlog();
             // this.time1 = setInterval(this.pullSvnlog, 1000);
@@ -423,7 +430,6 @@
           this.ziptype = value;
         },
         callback(key) {
-          console.log(key);
           this.ftp_status = key;
         },
         generate() {
@@ -471,11 +477,22 @@
         },
         setContent() {
          
-          var str = this.fileContent.replace(/\n|\r\n/g,"\\r\\n")
-          var now_str = str.replace(/\//g,"\\")
+          // var str = this.fileContent.replace(/\n|\r\n/g,"\\r\\n")
+          // var now_str = str.replace(/\//g,"\\")
           // var now_str = string.replace(/\s+/g,"")
-          var url = encodeURI(now_str);
-          axios.get('http://192.168.16.202:8088/ftp/write/' + this.project_name + '/' + this.file_name + '/' + url)
+          // var url = encodeURI(now_str);
+          // axios.get('http://192.168.16.202:8088/ftp/write/' + this.project_name + '/' + this.file_name + '/' + url)
+          // .then(res => {
+          //   console.log(res)
+          // })
+          // .catch(err => {
+          //   console.error(err); 
+          // })
+          axios.post('http://192.168.16.202:8088/ftp/write',qs.stringify({
+            'projectName' : this.project_name,
+            'fileName' : this.file_name,
+            'content' : this.fileContent
+          }))
           .then(res => {
             console.log(res)
           })
