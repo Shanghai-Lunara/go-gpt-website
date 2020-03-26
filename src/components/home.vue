@@ -49,6 +49,17 @@
 
                   </a-timeline-item>
                 </a-timeline>
+
+                <div v-if="ftp_status == 3"> 
+                  <a-textarea
+                    v-model="fileContent"
+                    placeholder="file content"
+                    :autoSize="{ minRows: 3, maxRows: 5 }"
+                    style="height: 600px;"
+                    id="text_content"
+                  />
+                  <a-button type="primary" id="set" @click="setContent" style="margin-left: 180px; margin-top: 10px;">确认修改</a-button>
+                </div>
               </a-col>
 
               <a-col :span="8" style="margin-top:50px;">
@@ -77,11 +88,19 @@
                         </a-form-item>
                         <a-button type="primary" id="create" @click="generate" style="margin-left: 180px;">生成</a-button>
                       </a-tab-pane>
+
                       <a-tab-pane tab="ftp日志文件查询" key="2" forceRender>
-
+                        <a-input placeholder="Basic usage" defaultValue="intro" v-model="searchLog" />
+                        <a-button type="primary" id="search" @click="search" style="margin-left: 180px; margin-top: 10px;">搜索日志</a-button>
                       </a-tab-pane>
-                      <a-tab-pane tab="ftp文件读取" key="3">
 
+                      <a-tab-pane tab="ftp文件读取" key="3">
+                        <a-input-search
+                          placeholder="文件名"
+                          @search="onSearch"
+                          enterButton="读取"
+                          size="default"
+                        />
                       </a-tab-pane>
                     </a-tabs>
                   </div>
@@ -109,12 +128,16 @@
       </a-layout>
     </a-layout>
     <popout ref="dialog" @setGitpar="setGit" />
+    <drawer ref="shade" />
   </a-layout>
 </template>
 <script>
-  import axios from 'axios'
-  import popout from '../components/popout'
+  import axios from 'axios';
+  import popout from '../components/popout';
   import { TreeSelect } from 'ant-design-vue';
+
+  import drawer from '../components/drawer';
+
   const SHOW_PARENT = TreeSelect.SHOW_PARENT;
 
   const treeData = [
@@ -216,10 +239,15 @@
         treeData,
         SHOW_PARENT,
         ziptype: 'pat',
+        searchLog: 'intro',
+        fileContent: '',
+        ftp_status: 1,
+        file_name: '',
       };
     },
     components: {
-      popout
+      popout,
+      drawer,
     },
     created: function () {
         axios.get('http://192.168.16.202:8088/git/all')
@@ -266,6 +294,10 @@
               this.commitSvn();
             }
         }, 
+        setShade() {
+          // 遮罩层
+          this.$refs.shade.showDrawer;
+        },
         showModal(id) {
           this.$refs.dialog.visible = true;
           this.$refs.dialog.title = this.branch;
@@ -389,10 +421,10 @@
         },
         typeChange(value) {
           this.ziptype = value;
-          console.log(value);
         },
         callback(key) {
           console.log(key);
+          this.ftp_status = key;
         },
         generate() {
           var arr = [];
@@ -401,6 +433,49 @@
           }
           var str = arr.join(',');
           axios.get('http://192.168.16.202:8088/ftp/compress/' + this.project_name + "/" + this.branch + "/" + this.ziptype + "/" + str)
+          .then(res => {
+            console.log(res)
+          })
+          .catch(err => {
+            console.error(err); 
+          })
+        },
+        search() {
+          this.$refs.shade.showDrawer();
+          axios.get('http://192.168.16.202:8088/ftp/log/' + this.project_name + '/' + this.searchLog)
+          .then(res => {
+            var list_data = res.data.data;
+            var arr = [];
+
+            for (let index = 0; index < list_data.length; index++) {
+              arr.unshift(list_data[index]['name']);
+            }
+
+            this.$refs.shade.list_data = arr;
+          })
+          .catch(err => {
+            console.error(err); 
+          })
+        },
+        onSearch(value) {
+          // 读取文件
+          axios.get('http://192.168.16.202:8088/ftp/read/' + this.project_name + '/' + value)
+          .then(res => {
+            var result = res.data.data;
+            this.fileContent = result;
+            this.file_name = value;
+          })
+          .catch(err => {
+            console.error(err); 
+          })
+        },
+        setContent() {
+         
+          var str = this.fileContent.replace(/\n|\r\n/g,"\\r\\n")
+          var now_str = str.replace(/\//g,"\\")
+          // var now_str = string.replace(/\s+/g,"")
+          var url = encodeURI(now_str);
+          axios.get('http://192.168.16.202:8088/ftp/write/' + this.project_name + '/' + this.file_name + '/' + url)
           .then(res => {
             console.log(res)
           })
