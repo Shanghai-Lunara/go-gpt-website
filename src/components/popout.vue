@@ -26,13 +26,14 @@
     },
     watch: {
         status(newvalue) {
-            console.log(newvalue)
             if (newvalue == 1) {
                 this.content_data.title = 'tag:';
                 this.content_data.content = 'cn';
+                this.status = 4;
             } else if (newvalue == 2) {
                 this.content_data.title = '备注:';
                 this.content_data.content = '数值更新';
+                this.status = 2;
             }
         }
     },

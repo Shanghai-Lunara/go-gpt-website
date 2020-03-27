@@ -134,12 +134,10 @@
   </a-layout>
 </template>
 <script>
-  import axios from 'axios';
   import popout from '../components/popout';
   import { TreeSelect } from 'ant-design-vue';
 
   import drawer from '../components/drawer';
-  import qs from 'qs';
 
   const SHOW_PARENT = TreeSelect.SHOW_PARENT;
 
@@ -253,33 +251,31 @@
       drawer,
     },
     created: function () {
-        axios.get('http://192.168.16.202:8088/git/all')
-        .then(res => {
-            var all_data = res.data.data;
-            var index = 1;
-            var now_data = {};
-            var tag = '';
-            for (var key in all_data) {
-                now_data.id = index
-                now_data.name = all_data[key]['name'] 
-                this.project_data.push(now_data)
-                index++
-                var list = all_data[key]['list_branches']
-                for (let index = 0; index < list.length; index++) {
-                    this.branch_data.push(list[index]['name'])
-                    if (list[index]['active'] == 1) {
-                      tag = list[index]['name'];
-                    }
-                }
-            }
-            this.defaultValue = tag;
-            this.branch = tag;
-            this.project_name = 'hero';
-            setTimeout(this.pullTask, 1000);
-        })
-        .catch(err => {
-            console.error(err); 
-        })
+      // 拉取分支
+      this.$get('/git/all')
+            .then((res) => {
+              var all_data = res.data;
+              var index = 1;
+              var now_data = {};
+              var tag = '';
+              for (var key in all_data) {
+                  now_data.id = index
+                  now_data.name = all_data[key]['name'] 
+                  this.project_data.push(now_data)
+                  index++
+                  var list = all_data[key]['list_branches']
+                  for (let index = 0; index < list.length; index++) {
+                      this.branch_data.push(list[index]['name'])
+                      if (list[index]['active'] == 1) {
+                        tag = list[index]['name'];
+                      }
+                  }
+              }
+              this.defaultValue = tag;
+              this.branch = tag;
+              this.project_name = 'hero';
+              setTimeout(this.pullTask, 1000);
+            })
     },
     mounted: function() {
       // setInterval(this.pullTask, 10000);
@@ -327,40 +323,32 @@
           
         },
         gitSvgtag() {
-          var url = 'http://192.168.16.202:8088/git/set/' + this.project_name + '/' + this.branch + '/' + this.$refs.dialog.content_data.content;
-          axios.get(url)
-          .then(res => {
-            console.log(res);
-          })
-          .catch(err => {
-            console.error(err); 
+          // 指向svn生成
+          console.log(this.$refs.dialog.content_data.content)
+          this.$get('/git/set/' + this.project_name + '/' + this.branch + '/' + this.$refs.dialog.content_data.content)
+          .then((res) => {
+            console.log(res)
           })
         },
         setGenplist() {
-            var url = 'http://192.168.16.202:8088/git/gen/' + this.project_name + '/' + this.branch;
-            axios.get(url)
-            .then(res => {
-                console.log(res)
-            })
-            .catch(err => {
-                console.error(err); 
+            // genlist
+            this.$get('/git/gen/' + this.project_name + '/' + this.branch)
+            .then((res) => {
+              console.log(res)
             })
         },
         commitSvn() {
-          var url = 'http://192.168.16.202:8088/svn/commit/' + this.project_name + '/' + this.branch + '/' + this.$refs.dialog.content_data.content;
-            axios.get(url)
-            .then(res => {
-                console.log(res)
-            })
-            .catch(err => {
-                console.error(err); 
+          // 提交svn
+          this.$get('/svn/commit/' + this.project_name + '/' + this.branch + '/' + this.$refs.dialog.content_data.content)
+            .then((res) => {
+              console.log(res)
             })
         },
         pullSvnlog() {
-          var url = 'http://192.168.16.202:8088/svn/log/' + this.project_name + '/3';
-            axios.get(url)
-            .then(res => {
-                var result = res.data.data;
+          // 拉取svn 日志
+          this.$get('/svn/log/' + this.project_name + '/3')
+            .then((res) => {
+              var result = res.data;
                 this.svn_log = [];
             
                 for (var index in result) {
@@ -378,7 +366,6 @@
                     var num = path_list[i]['value'].lastIndexOf('/');
                     var k = path_list[i]['value'].slice(0, num);
                   
-                    // select_data.push(path_list[i]['value'])
                     if (select_data[k] != undefined) {
                         select_data[k].push(path_list[i]['value'].slice(num + 1));
                     } else {
@@ -392,15 +379,13 @@
 
                   this.svn_log.push(arr);
                 }
-              })
-            .catch(err => {
-                console.error(err); 
             })
         },
         pullTask() {
-          axios.get('http://192.168.16.202:8088/task/all/hero')
-          .then(res => {
-            var result = res.data.data;
+          //  拉取所有任务
+          this.$get('/task/all/hero')
+          .then((res) => {
+            var result = res.data;
             for (var key in result) {
               var arr = [];
               if (result[key]['status'] === 0) {
@@ -422,9 +407,6 @@
               this.task_data.unshift(arr);
             }
           })
-          .catch(err => {
-            console.error(err); 
-          })
         },
         typeChange(value) {
           this.ziptype = value;
@@ -438,67 +420,48 @@
             arr.push(this.treeData[this.value[index]]['title'])
           }
           var str = arr.join(',');
-          axios.get('http://192.168.16.202:8088/ftp/compress/' + this.project_name + "/" + this.branch + "/" + this.ziptype + "/" + str)
-          .then(res => {
-            console.log(res)
-          })
-          .catch(err => {
-            console.error(err); 
-          })
+
+          this.$get('/ftp/compress/' + this.project_name + "/" + this.branch + "/" + this.ziptype + "/" + str)
+            .then((res) => {
+              console.log(res)
+            })
         },
         search() {
+          // 拉取ftp 日志
           this.$refs.shade.showDrawer();
-          axios.get('http://192.168.16.202:8088/ftp/log/' + this.project_name + '/' + this.searchLog)
-          .then(res => {
-            var list_data = res.data.data;
-            var arr = [];
 
-            for (let index = 0; index < list_data.length; index++) {
-              arr.unshift(list_data[index]['name']);
-            }
+          this.$get('/ftp/log/' + this.project_name + '/' + this.searchLog)
+            .then((res) => {
+              var list_data = res.data;
+              var arr = [];
 
-            this.$refs.shade.list_data = arr;
-          })
-          .catch(err => {
-            console.error(err); 
-          })
+              for (let index = 0; index < list_data.length; index++) {
+                arr.unshift(list_data[index]['name']);
+              }
+
+              this.$refs.shade.list_data = arr;
+            })
         },
         onSearch(value) {
           // 读取文件
-          axios.get('http://192.168.16.202:8088/ftp/read/' + this.project_name + '/' + value)
-          .then(res => {
-            var result = res.data.data;
-            this.fileContent = result;
-            this.file_name = value;
-          })
-          .catch(err => {
-            console.error(err); 
-          })
+          this.$get('/ftp/read/' + this.project_name + '/' + value)
+            .then((res) => {
+              var result = res.data;
+              this.fileContent = result;
+              this.file_name = value;
+            })
         },
         setContent() {
-         
-          // var str = this.fileContent.replace(/\n|\r\n/g,"\\r\\n")
-          // var now_str = str.replace(/\//g,"\\")
-          // var now_str = string.replace(/\s+/g,"")
-          // var url = encodeURI(now_str);
-          // axios.get('http://192.168.16.202:8088/ftp/write/' + this.project_name + '/' + this.file_name + '/' + url)
-          // .then(res => {
-          //   console.log(res)
-          // })
-          // .catch(err => {
-          //   console.error(err); 
-          // })
-          axios.post('http://192.168.16.202:8088/ftp/write',qs.stringify({
+          // file set & commit
+          this.$post('/ftp/write', {
             'projectName' : this.project_name,
             'fileName' : this.file_name,
             'content' : this.fileContent
-          }))
-          .then(res => {
-            console.log(res)
           })
-          .catch(err => {
-            console.error(err); 
-          })
+            .then((res) => {
+              this.fileContent = '';
+              console.log(res)
+            })
         },
     },
   };
