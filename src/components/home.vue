@@ -92,18 +92,10 @@
                       </a-tab-pane>
 
                       <a-tab-pane tab="ftp日志文件查询" key="2" forceRender>
-                        <a-input placeholder="Basic usage" defaultValue="intro" v-model="searchLog" />
+                        <a-input placeholder="file name" defaultValue="intro" v-model="searchLog" />
                         <a-button type="primary" id="search" @click="search" style="margin-left: 180px; margin-top: 10px;">搜索日志</a-button>
                       </a-tab-pane>
 
-                      <!-- <a-tab-pane tab="ftp文件读取" key="3">
-                        <a-input-search
-                          placeholder="文件名"
-                          @search="onSearch"
-                          enterButton="读取"
-                          size="default"
-                        />
-                      </a-tab-pane> -->
                     </a-tabs>
                   </div>
 
@@ -325,6 +317,10 @@
         gitSvgtag() {
           // 指向svn生成
           console.log(this.$refs.dialog.content_data.content)
+          if (this.$refs.dialog.content_data.content == '') {
+            this.$message.info('信息不能为空');
+            return;
+          }
           this.$get('/git/set/' + this.project_name + '/' + this.branch + '/' + this.$refs.dialog.content_data.content)
           .then((res) => {
             console.log(res)
@@ -339,6 +335,10 @@
         },
         commitSvn() {
           // 提交svn
+          if (this.$refs.dialog.content_data.content == '') {
+            this.$message.info('备注信息不能为空');
+            return;
+          } 
           this.$get('/svn/commit/' + this.project_name + '/' + this.branch + '/' + this.$refs.dialog.content_data.content)
             .then((res) => {
               console.log(res)
@@ -428,6 +428,10 @@
         },
         search() {
           // 拉取ftp 日志
+          if (this.searchLog == '') {
+            this.$message.info('文件名不能为空');
+            return;
+          }
           this.$refs.shade.showDrawer();
 
           this.$get('/ftp/log/' + this.project_name + '/' + this.searchLog)
