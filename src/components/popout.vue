@@ -4,7 +4,7 @@
       <p v-if="status === 3">{{message}}</p>
 
       <label for="" v-if="status !== 3">{{content_data.title}}
-          <a-input style="width: 100px; margin-left:10px;" id="tagdata" v-model="content_data.content" />
+          <a-input style="width: 350px; margin-left:10px;" id="tagdata" v-model="content_data.content" />
       </label>
       
     </a-modal>

@@ -35,12 +35,6 @@
                       <a-select-opt-group v-for="(select_value, select_id) in svn_value['select']" :key="select_id">
                         <span slot="label"><a-icon type="user" />{{select_id}}</span>
 
-                        <!-- one -->
-                        <!-- <a-select-option v-for="(select_value, select_id) in svn_value['select']" :key="select_id" v-bind:value="select_value">
-                          {{select_value}}
-                        </a-select-option> -->
-
-                        <!-- two -->
                         <a-select-option v-for="k in select_value" :key="k" v-bind:value="k">
                           {{k}}
                         </a-select-option>
@@ -55,8 +49,8 @@
                      <a-textarea
                     v-model="fileContent"
                     placeholder="file content"
-                    :autoSize="{ minRows: 3, maxRows: 5 }"
-                    style="height: 600px;"
+                    :autoSize="{ minRows: 4, maxRows: 30 }"
+                    style="height: 800px; overflow: auto;"
                     id="text_content"
                   />
                   <a-button type="primary" id="set" @click="setContent" style="margin-left: 180px; margin-top: 10px;">确认修改</a-button>
@@ -64,7 +58,7 @@
                 </div>
               </a-col>
 
-              <a-col :span="8" style="margin-top:50px;">
+              <a-col :span="8" style="margin-top:50px; overflow: auto; height: 100%;" >
                 <a-form :form="form" :label-col="{ span: 5 }" :wrapper-col="{ span: 12 }">
                   <a-form-item label="分支选择">
                     <a-select v-model="defaultValue" style="width: 240px; margin-left: 10px;" @change="handleChange" id="select">
@@ -80,7 +74,7 @@
                             <a-select-option v-for="type_value in zip_type" :key="type_value.id" v-bind:value="type_value.name">{{type_value.name}}</a-select-option>
                           </a-select>
                           <a-tree-select
-                            style="width: 100%"
+                            style="width: 100%;"
                             :treeData="treeData"
                             v-model="value"
                             treeCheckable
@@ -94,6 +88,12 @@
                       <a-tab-pane tab="ftp日志文件查询" key="2" forceRender>
                         <a-input placeholder="file name" defaultValue="intro" v-model="searchLog" />
                         <a-button type="primary" id="search" @click="search" style="margin-left: 180px; margin-top: 10px;">搜索日志</a-button>
+
+                        <div style="margin-top: 20px;">
+                          <a-button type="primary" v-for="file_value in file_list" :key="file_value" style="margin-top: 10px; margin-left: 20px;" @click="onSearch(file_value)">{{file_value}}</a-button>
+                        </div>
+                      
+                        
                       </a-tab-pane>
 
                     </a-tabs>
@@ -112,7 +112,7 @@
               <a-col :span="8" style="overflow: auto; height: 100%; margin-top: 10px;">
                 <a-timeline>
                   <a-timeline-item v-for="(value,index) in task_data" :key="index" :color="value['status']">
-                    <p v-for="message in value['task_data']" :key="message">{{message}}</p>
+                    <p v-for="message in value['task_data']" :key="message" style="margin-top: 5px;">{{message}}</p>
                   </a-timeline-item>
                 </a-timeline>
               </a-col>
@@ -122,14 +122,15 @@
       </a-layout>
     </a-layout>
     <popout ref="dialog" @setGitpar="setGit" />
-    <drawer ref="shade" @setDrawer="onSearch" />
+    <!-- <drawer ref="shade" @setDrawer="onSearch" /> -->
   </a-layout>
 </template>
 <script>
   import popout from '../components/popout';
   import { TreeSelect } from 'ant-design-vue';
 
-  import drawer from '../components/drawer';
+  // 遮罩层
+  // import drawer from '../components/drawer';
 
   const SHOW_PARENT = TreeSelect.SHOW_PARENT;
 
@@ -236,11 +237,13 @@
         fileContent: '',
         ftp_status: 1,
         file_name: '',
+        file_list: [],
+        // nowFile: '',
       };
     },
     components: {
       popout,
-      drawer,
+      // drawer,
     },
     created: function () {
       // 拉取分支
@@ -266,18 +269,18 @@
               this.defaultValue = tag;
               this.branch = tag;
               this.project_name = 'hero';
-              setTimeout(this.pullTask, 1000);
+              this.pullTask();
             })
     },
     mounted: function() {
-      // setInterval(this.pullTask, 10000);
+      setInterval(this.pullTask, this.Timer.task_refresh_time);
     },
     methods: {
         handleChange(value) {
             this.branch = value;
         },
         setGit() {
-            if (this.$refs.dialog.status == 1) {
+            if (this.$refs.dialog.status == 3) {
               this.setGenplist();
             } else if (this.$refs.dialog.status == 4) {
               this.gitSvgtag();
@@ -285,10 +288,6 @@
               this.commitSvn();
             }
         }, 
-        setShade() {
-          // 遮罩层
-          this.$refs.shade.showDrawer;
-        },
         showModal(id) {
           this.$refs.dialog.visible = true;
           this.$refs.dialog.title = this.branch;
@@ -308,7 +307,7 @@
 
           if (data == 2) {
             this.pullSvnlog();
-            // this.time1 = setInterval(this.pullSvnlog, 1000);
+            this.time1 = setInterval(this.pullSvnlog, this.Timer.svn_log_refresh);
           } else {
             clearInterval(this.time1);
           }
@@ -316,13 +315,13 @@
         },
         gitSvgtag() {
           // 指向svn生成
-          console.log(this.$refs.dialog.content_data.content)
           if (this.$refs.dialog.content_data.content == '') {
             this.$message.info('信息不能为空');
             return;
           }
           this.$get('/git/set/' + this.project_name + '/' + this.branch + '/' + this.$refs.dialog.content_data.content)
           .then((res) => {
+            this.$message.info('初始化tag成功');
             console.log(res)
           })
         },
@@ -330,6 +329,7 @@
             // genlist
             this.$get('/git/gen/' + this.project_name + '/' + this.branch)
             .then((res) => {
+              this.$message.info('更表成功');
               console.log(res)
             })
         },
@@ -341,12 +341,13 @@
           } 
           this.$get('/svn/commit/' + this.project_name + '/' + this.branch + '/' + this.$refs.dialog.content_data.content)
             .then((res) => {
+              this.$message.info('svn提交成功');
               console.log(res)
             })
         },
         pullSvnlog() {
           // 拉取svn 日志
-          this.$get('/svn/log/' + this.project_name + '/3')
+          this.$get('/svn/log/' + this.project_name + '/10')
             .then((res) => {
               var result = res.data;
                 this.svn_log = [];
@@ -385,6 +386,7 @@
           //  拉取所有任务
           this.$get('/task/all/hero')
           .then((res) => {
+            this.task_data = [];
             var result = res.data;
             for (var key in result) {
               var arr = [];
@@ -432,7 +434,6 @@
             this.$message.info('文件名不能为空');
             return;
           }
-          this.$refs.shade.showDrawer();
 
           this.$get('/ftp/log/' + this.project_name + '/' + this.searchLog)
             .then((res) => {
@@ -443,7 +444,7 @@
                 arr.unshift(list_data[index]['name']);
               }
 
-              this.$refs.shade.list_data = arr;
+              this.file_list = arr.slice(0,10);
             })
         },
         onSearch(value) {
@@ -464,6 +465,7 @@
           })
             .then((res) => {
               this.fileContent = '';
+              this.$message.info('文件更新成功');
               console.log(res)
             })
         },
