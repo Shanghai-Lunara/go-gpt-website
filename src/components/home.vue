@@ -425,6 +425,7 @@
 
           this.$get('/ftp/compress/' + this.project_name + "/" + this.branch + "/" + this.ziptype + "/" + str)
             .then((res) => {
+              this.$message.info('文件生成成功');
               console.log(res)
             })
         },
@@ -441,6 +442,10 @@
               var arr = [];
 
               for (let index = 0; index < list_data.length; index++) {
+                var str = list_data[index]['name'];
+                if (str.search(/_222_/) > 0) {
+                  continue;
+                }
                 arr.unshift(list_data[index]['name']);
               }
 
