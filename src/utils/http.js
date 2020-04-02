@@ -8,7 +8,7 @@ import qs from 'qs'
 //     timeout: 3000,
 // })
 
-axios.defaults.baseURL= 'http://192.168.16.202:8088';
+axios.defaults.baseURL= process.env.VUE_APP_URL;
 axios.defaults.timeout= 5000;
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
 
