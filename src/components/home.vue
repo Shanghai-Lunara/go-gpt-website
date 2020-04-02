@@ -31,9 +31,12 @@
                   <a-timeline-item v-for="(svn_value, svn_index) in svn_log" :key="svn_index">
                     <p v-for="(message,id) in svn_value['message']" :key="id">{{message}}</p>
 
-                    <a-select defaultValue="file change" style="width: 500px">
+                    <a-select defaultValue="CHANGES" style="width: 500px">
                       <a-select-opt-group v-for="(select_value, select_id) in svn_value['select']" :key="select_id">
-                        <span slot="label"><a-icon type="user" />{{select_id}}</span>
+                        <span slot="label" style="color:blue;" >
+                          <!-- <a-icon type="user" /> -->
+                          {{select_id}}
+                        </span>
 
                         <a-select-option v-for="k in select_value" :key="k" v-bind:value="k">
                           {{k}}
@@ -342,6 +345,7 @@
           this.$get('/svn/commit/' + this.project_name + '/' + this.branch + '/' + this.$refs.dialog.content_data.content)
             .then((res) => {
               this.$message.info('svn提交成功');
+              this.pullSvnlog();
               console.log(res)
             })
         },
@@ -360,18 +364,19 @@
                   list.push(result[index]['revision']);
                   list.push(result[index]['msg']);
                   list.push(result[index]['author']);
-                  list.push(result[index]['date_time']);
+                  
+                  // list.push(result[index]['date_time']);
+                  list.push(this.Timer.setTime(result[index]['date_time']));
                  
                   var path_list = result[index]['paths'];
                   for (var i = 0; i < path_list.length; i++) {
                     var num = path_list[i]['value'].lastIndexOf('/');
                     var k = path_list[i]['value'].slice(0, num);
-                  
                     if (select_data[k] != undefined) {
-                        select_data[k].push(path_list[i]['value'].slice(num + 1));
+                        select_data[k].push('[' + path_list[i]['action'] + ']' + path_list[i]['value'].slice(num + 1));
                     } else {
                        select_data[k] = [];
-                       select_data[k].push(path_list[i]['value'].slice(num + 1));
+                       select_data[k].push('[' + path_list[i]['action'] + ']' + path_list[i]['value'].slice(num + 1));
                     }
                   }
                                     

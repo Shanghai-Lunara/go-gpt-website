@@ -9,7 +9,7 @@ import qs from 'qs'
 // })
 
 axios.defaults.baseURL= 'http://192.168.16.202:8088';
-axios.defaults.timeout= 3000;
+axios.defaults.timeout= 5000;
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
 
 // 请求拦截器  配置loading
