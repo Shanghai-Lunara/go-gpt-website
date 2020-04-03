@@ -85,7 +85,7 @@
                             searchPlaceholder="Please select"
                           />
                         </a-form-item>
-                        <a-button type="primary" id="create" @click="generate" style="margin-left: 180px;">生成</a-button>
+                        <a-button type="primary" id="create" style="margin-left: 180px;" @click="showModal(4)" >生成</a-button>
                       </a-tab-pane>
 
                       <a-tab-pane tab="ftp日志文件查询" key="2" forceRender>
@@ -241,7 +241,7 @@
         ftp_status: 1,
         file_name: '',
         file_list: [],
-        // nowFile: '',
+        get_tag: [],
       };
     },
     components: {
@@ -264,6 +264,7 @@
                   var list = all_data[key]['list_branches']
                   for (let index = 0; index < list.length; index++) {
                       this.branch_data.push(list[index]['name'])
+                      this.get_tag[list[index]['name']] = list[index]['svn_tag'];
                       if (list[index]['active'] == 1) {
                         tag = list[index]['name'];
                       }
@@ -284,8 +285,12 @@
         },
         setGit() {
             if (this.$refs.dialog.status == 3) {
-              this.setGenplist();
-            } else if (this.$refs.dialog.status == 4) {
+              if (this.$refs.dialog.ftp_status == 1) {
+                this.generate();
+              } else {
+                this.setGenplist();
+              }
+            } else if (this.$refs.dialog.status == 1) {
               this.gitSvgtag();
             } else if (this.$refs.dialog.status == 2) {
               this.commitSvn();
@@ -296,10 +301,19 @@
           this.$refs.dialog.title = this.branch;
           if (id === 1) {
             this.$refs.dialog.status = 1;
+            this.$refs.dialog.ftp_status = 0;
+            this.$refs.dialog.content_data.content = this.get_tag[this.branch];
           } else if (id === 2){
             this.$refs.dialog.status = 2;
+            this.$refs.dialog.ftp_status = 0;
+          } else if (id == 3) {
+            this.$refs.dialog.status = 3;
+            this.$refs.dialog.ftp_status = 0;
+            this.$refs.dialog.message = '确认更新 ?';
           } else {
             this.$refs.dialog.status = 3;
+            this.$refs.dialog.ftp_status = 1;
+            this.$refs.dialog.message = '确认生成ftp?';
           }
         },
         setStatus(data) {

@@ -16,25 +16,27 @@
       return {
         visible: false,
         title: '标题',
-        message: '确认更新 ?',
+        message: '',
         status: 3,
         content_data: {
             title: '',
             content: '',
-        }
+        },
+        ftp_status: 0
       };
     },
     watch: {
         status(newvalue) {
             if (newvalue == 1) {
                 this.content_data.title = 'tag:';
-                this.content_data.content = 'cn';
-                this.status = 4;
+                // this.content_data.content = 'cn';
+                this.status = 1;
             } else if (newvalue == 2) {
                 this.content_data.title = '备注:';
                 this.content_data.content = '数值更新';
                 this.status = 2;
             }
+
         }
     },
     methods: {
