@@ -1,6 +1,9 @@
 import axios from 'axios'
 import {message} from 'ant-design-vue'
 import qs from 'qs'
+import {Loading} from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css';
+import _ from 'lodash'
 
 // 创建新的axios实例
 // const service = axios.create({
@@ -9,8 +12,56 @@ import qs from 'qs'
 // })
 
 axios.defaults.baseURL= process.env.VUE_APP_URL;
-axios.defaults.timeout= 5000;
+axios.defaults.timeout= 10000;
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
+
+// loading 对象
+let loading;
+
+// 显示loading
+function startLoading() {
+    loading = Loading.service({
+        lock: true,
+        text: 'Loading',
+        spinner: 'el-icon-loading',
+        fullscreen: true,
+        background: 'rgba(0, 0, 0, 0.7)'
+    })
+}
+
+// function endLoading() {
+//     loading.close();
+// }
+
+// 当前请求数量
+let needLoadingCount = 0;
+
+export function showLoading() {
+    if (needLoadingCount === 0) {
+        startLoading();
+    }
+    needLoadingCount++;
+}
+
+export function hideLoading() {
+    if (needLoadingCount <= 0) {
+        return;
+    }
+
+    needLoadingCount--;
+
+    if (needLoadingCount === 0) {
+        _.debounce(tryCloseLoading, 300) ()
+        // endLoading();
+    }
+}
+
+const tryCloseLoading = () => {
+    if (needLoadingCount === 0) {
+      loading.close()
+    }
+  }
+
 
 // 请求拦截器  配置loading
 axios.interceptors.request.use(config => {
@@ -18,6 +69,7 @@ axios.interceptors.request.use(config => {
     config.headers = {
         'Content-Type':'application/x-www-form-urlencoded'
     }
+    showLoading();
     return config
 }, error => {
     Promise.reject(error)
@@ -27,6 +79,7 @@ axios.interceptors.request.use(config => {
 axios.interceptors.response.use(response => {
 // Do something before response is sent
     if (response.status === 200) {
+        hideLoading();
         return Promise.resolve(response)
     } else {
         return Promise.reject(response);
