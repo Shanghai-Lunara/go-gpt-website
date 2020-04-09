@@ -1,5 +1,6 @@
 <template>
     <home />
+    <!-- <test /> -->
 </template>
 
 <script>
@@ -10,6 +11,7 @@ export default {
   name: 'App',
   components: {
     home
+    // test
   }
 }
 </script>
