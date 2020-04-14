@@ -1,6 +1,6 @@
 export default {
-     task_refresh_time : 200000,
-     svn_log_refresh : 200000,
+     task_refresh_time : 100000,
+     svn_log_refresh : 100000,
 
      setTime(utc_datetime) {
           // 转为正常的时间格式 年-月-日 时:分:秒

@@ -6,6 +6,7 @@ import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/antd.css'
 import {get, post} from './utils/http'
 import timer from './config/config';
+import router from './components/router/router'
 
 Vue.use(Antd)
 Vue.use(ElementUI)
@@ -16,5 +17,6 @@ Vue.prototype.Timer = timer
 Vue.config.productionTip = false
 
 new Vue({
+  router,
   render: h => h(App),
 }).$mount('#app')

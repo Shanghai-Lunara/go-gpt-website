@@ -27,24 +27,38 @@
         >
             <a-row style="height: 100%;">
               <a-col :span="8" style="overflow: auto; height: 100%; margin-top: 10px;">
-                <a-timeline v-if="branch_status === 2">
-                  <a-timeline-item v-for="(svn_value, svn_index) in svn_log" :key="svn_index">
-                    <p v-for="(message,id) in svn_value['message']" :key="id">{{message}}</p>
 
-                    <a-select defaultValue="CHANGES" style="width: 500px">
-                      <a-select-opt-group v-for="(select_value, select_id) in svn_value['select']" :key="select_id">
-                        <span slot="label" style="color:blue;" >
-                          {{select_id}}
-                        </span>
+                <el-timeline v-if="branch_status === 2">
+                    <el-timeline-item placement="bottom" v-for="(svn_value, svn_index) in svn_log" :key="svn_index" :timestamp="svn_value['date_time']" type="primary">
+                        <el-card style="margin-top: 10px;">
+                            <h4>svn&nbsp;&nbsp;{{svn_value['revision']}}</h4>
+                            <p>{{svn_value['msg']}}</p>
 
-                        <a-select-option v-for="k in select_value" :key="k" v-bind:value="k">
-                          {{k}}
-                        </a-select-option>
-                      </a-select-opt-group>
-                    </a-select>
+                            <!-- 1111 -->
+                            <!-- <el-select v-model="value" placeholder="CHANGES" style="width: 300px">
+                                <el-option-group
+                                v-for="(select_value, select_id) in svn_value['paths']" :key="select_id"
+                                :label="select_id">
+                                    <el-option
+                                        v-for="k in select_value" :key="k"
+                                        
+                                        :value="k">
+                                    </el-option>
+                                </el-option-group>
+                            </el-select> -->
 
-                  </a-timeline-item>
-                </a-timeline>
+                            <!-- 2222 -->
+                            <el-collapse>
+                                <el-collapse-item v-for="(select_value, select_id) in svn_value['paths']" :key="select_id" :title="select_id">
+                                    <div v-for="(v,k) in select_value" :key="k">
+                                        <label style="color: blue;">{{v}}</label>{{k}}
+                                    </div>
+                                </el-collapse-item>
+                            </el-collapse>
+
+                        </el-card>
+                    </el-timeline-item>
+                </el-timeline>
 
                 <div v-if="branch_status === 3">
                   <div v-if="ftp_status == 2">
@@ -107,21 +121,33 @@
 
                   <a-form-item :wrapper-col="{ span: 12, offset: 5 }">
                     <el-button type="primary" id="btn" @click="showModal(3)" v-if="branch_status === 1" size="medium">更表</el-button>
-                    <!-- <a-button type="primary" id="btn" @click="showModal(3)" v-if="branch_status === 1">
-                      更表
-                    </a-button> -->
-                    <a-button type="primary" id="set" @click="showModal(1)" v-if="branch_status === 2">预览</a-button>
-                    <a-button type="primary" id="commit" @click="showModal(2)" v-if="branch_status === 2">提交</a-button>
+                    <el-button type="primary" id="btn" @click="showModal(1)" v-if="branch_status === 2" size="medium">预览</el-button>
+                    <el-button type="primary" id="btn" @click="showModal(2)" v-if="branch_status === 2" size="medium">提交</el-button>
                   </a-form-item>
                 </a-form>
               </a-col>
 
               <a-col :span="8" style="overflow: auto; height: 100%; margin-top: 10px;">
-                <a-timeline>
+                
+                <el-timeline>
+                    <el-timeline-item placement="top" v-for="(value,index) in task_data" :key="index" :timestamp="value['command']" :type="value['status']">
+                        <el-card style="margin-top: 10px;">
+                            <!-- <p v-for="message in value['task_data']" :key="message" style="margin-top: 5px;">{{message}}</p> -->
+
+                            <el-timeline-item v-for="(status, time) in value['task_data']" :key="time" :timestamp="time" type="success">
+                                {{status}}
+                            </el-timeline-item>
+
+                        </el-card>
+                    </el-timeline-item>
+                </el-timeline>
+
+
+                <!-- <a-timeline>
                   <a-timeline-item v-for="(value,index) in task_data" :key="index" :color="value['status']">
                     <p v-for="message in value['task_data']" :key="message" style="margin-top: 5px;">{{message}}</p>
                   </a-timeline-item>
-                </a-timeline>
+                </a-timeline> -->
               </a-col>
             </a-row>
             
@@ -129,15 +155,11 @@
       </a-layout>
     </a-layout>
     <popout ref="dialog" @setGitpar="setGit" />
-    <!-- <drawer ref="shade" @setDrawer="onSearch" /> -->
   </a-layout>
 </template>
 <script>
-  import popout from '../components/popout';
+  import popout from '../popout';
   import { TreeSelect } from 'ant-design-vue';
-
-  // 遮罩层
-  // import drawer from '../components/drawer';
 
   const SHOW_PARENT = TreeSelect.SHOW_PARENT;
 
@@ -246,11 +268,11 @@
         file_name: '',
         file_list: [],
         get_tag: [],
+        count: 0,
       };
     },
     components: {
       popout,
-      // drawer,
     },
     created: function () {
       // 拉取分支
@@ -303,21 +325,27 @@
         showModal(id) {
           this.$refs.dialog.visible = true;
           this.$refs.dialog.title = this.branch;
-          if (id === 1) {
-            this.$refs.dialog.status = 1;
-            this.$refs.dialog.ftp_status = 0;
-            this.$refs.dialog.content_data.content = this.get_tag[this.branch];
-          } else if (id === 2){
-            this.$refs.dialog.status = 2;
-            this.$refs.dialog.ftp_status = 0;
-          } else if (id == 3) {
-            this.$refs.dialog.status = 3;
-            this.$refs.dialog.ftp_status = 0;
-            this.$refs.dialog.message = '确认更新 ?';
-          } else {
-            this.$refs.dialog.status = 3;
-            this.$refs.dialog.ftp_status = 1;
-            this.$refs.dialog.message = '确认生成ftp?';
+          switch (id) {
+              case 1:
+                    this.$refs.dialog.status = 1;
+                    this.$refs.dialog.ftp_status = 0;
+                    this.$refs.dialog.content_data.content = this.get_tag[this.branch];
+                    break;
+              case 2:
+                    this.$refs.dialog.status = 2;
+                    this.$refs.dialog.ftp_status = 0;
+                    break;
+              case 3:
+                    this.$refs.dialog.status = 3;
+                    this.$refs.dialog.ftp_status = 0;
+                    this.$refs.dialog.message = '确认更新 ?';
+                    break;
+          
+              default:
+                    this.$refs.dialog.status = 3;
+                    this.$refs.dialog.ftp_status = 1;
+                    this.$refs.dialog.message = '确认生成ftp?';
+                    break;
           }
         },
         setStatus(data) {
@@ -337,12 +365,12 @@
         gitSvgtag() {
           // 指向svn生成
           if (this.$refs.dialog.content_data.content == '') {
-            this.$message.info('信息不能为空');
+            this.$message.error('信息不能为空');
             return;
           }
           this.$get('/git/set/' + this.project_name + '/' + this.branch + '/' + this.$refs.dialog.content_data.content)
           .then((res) => {
-            this.$message.info('初始化tag成功');
+            this.$message.success('初始化tag成功');
             console.log(res)
           })
         },
@@ -350,20 +378,21 @@
             // genlist
             this.$get('/git/gen/' + this.project_name + '/' + this.branch)
             .then((res) => {
-              this.$message.info('更表成功');
+              this.$message.success('更表成功');
+              this.pullTask();
               console.log(res)
             })
         },
         commitSvn() {
           // 提交svn
           if (this.$refs.dialog.content_data.content == '') {
-            this.$message.info('备注信息不能为空');
+            this.$message.error('备注信息不能为空');
             return;
           } 
           this.$get('/svn/commit/' + this.project_name + '/' + this.branch + '/' + this.$refs.dialog.content_data.content)
             .then((res) => {
-              this.$message.info('svn提交成功');
               this.pullSvnlog();
+              this.$message.success('svn提交成功');
               console.log(res)
             })
         },
@@ -373,36 +402,28 @@
             .then((res) => {
               var result = res.data;
                 this.svn_log = [];
-            
+
                 for (var index in result) {
-                  var arr = [];
-                  var list = [];
-                  var select_data = {};
+                    
+                    var select_data = {};
+                    result[index]['date_time'] = this.Timer.setTime(result[index]['date_time'])
 
-                  list.push(result[index]['revision']);
-                  list.push(result[index]['msg']);
-                  list.push(result[index]['author']);
-                  
-                  // list.push(result[index]['date_time']);
-                  list.push(this.Timer.setTime(result[index]['date_time']));
-                 
-                  var path_list = result[index]['paths'];
-                  for (var i = 0; i < path_list.length; i++) {
-                    var num = path_list[i]['value'].lastIndexOf('/');
-                    var k = path_list[i]['value'].slice(0, num);
-                    if (select_data[k] != undefined) {
-                        select_data[k].push('[' + path_list[i]['action'] + ']' + path_list[i]['value'].slice(num + 1));
-                    } else {
-                       select_data[k] = [];
-                       select_data[k].push('[' + path_list[i]['action'] + ']' + path_list[i]['value'].slice(num + 1));
+                    var path_list = result[index]['paths'];
+                    for (var i = 0; i < path_list.length; i++) {
+                        var num = path_list[i]['value'].lastIndexOf('/');
+                        var k = path_list[i]['value'].slice(0, num);
+                        if (select_data[k] != undefined) {
+                            select_data[k][path_list[i]['value'].slice(num + 1)] = '[' + path_list[i]['action'] + ']';
+                        } else {
+                            select_data[k] = {};
+                            select_data[k][path_list[i]['value'].slice(num + 1)] = '[' + path_list[i]['action'] + ']';
+                        }
                     }
-                  }
-                                    
-                  arr['message'] = list;
-                  arr['select'] = select_data;
 
-                  this.svn_log.push(arr);
+                    result[index]['paths'] = select_data;
                 }
+
+                this.svn_log = result;
             })
         },
         pullTask() {
@@ -413,24 +434,63 @@
             var result = res.data;
             for (var key in result) {
               var arr = [];
-              if (result[key]['status'] === 0) {
-                arr['status'] = 'gray';
-              } else if (result[key]['status'] === 1) {
-                arr['status'] = 'green';
-              } else if (result[key]['status'] === 2) {
-                arr['status'] = 'blue';
-              } else {
-                arr['status'] = 'red';
+
+              switch (result[key]['status']) {
+                  case 0:
+                      arr['status'] = 'info';
+                      break;
+                  case 1:
+                      arr['status'] = 'success';
+                      break;
+                  case 2:
+                      arr['status'] = 'primary';
+                      break;
+                  default:
+                      arr['status'] = 'danger';
+                      break;
               }
+
+            //   if (result[key]['status'] === 0) {
+            //     arr['status'] = 'gray';
+            //   } else if (result[key]['status'] === 1) {
+            //     arr['status'] = 'green';
+            //   } else if (result[key]['status'] === 2) {
+            //     arr['status'] = 'blue';
+            //   } else {
+            //     arr['status'] = 'red';
+            //   }
               
               var command = result[key]['command']['project_name'] + "/" + result[key]['command']['branch_name'] + "/" + 
                 result[key]['command']['command'] + "/" + result[key]['command']['message'] + "/" + result[key]['command']['zip_type'] + "/" +
                 result[key]['command']['zip_flags'];
 
-              result[key]['message'].unshift(command);
-              arr['task_data'] = result[key]['message'];
+            //   arr['task_data'] = result[key]['message'];
+            //   console.log(result[key]['message'])
+              var message = result[key]['message'];
+              var list = {};
+              for (var index = 0; index < message.length; index++) {
+                  var num = message[index].lastIndexOf(']');
+                  var time = message[index].slice(0, num + 1);
+                  list[time] = message[index].slice(num + 2)
+              }
+            //   console.log(list)
+              arr['task_data'] = list
+              arr['command'] = command;
               this.task_data.unshift(arr);
             }
+
+            var now_count = this.task_data.length;
+
+            if (this.count != 0 && now_count != this.count) {
+                this.$notify({
+                    title: '任务列表变更',
+                    message: '',
+                    showClose: false,
+                    type: 'warning'
+                });
+            }
+
+            this.count = now_count;
           })
         },
         typeChange(value) {
@@ -448,14 +508,14 @@
 
           this.$get('/ftp/compress/' + this.project_name + "/" + this.branch + "/" + this.ziptype + "/" + str)
             .then((res) => {
-              this.$message.info('文件生成成功');
+              this.$message.success('文件生成成功');
               console.log(res)
             })
         },
         search() {
           // 拉取ftp 日志
           if (this.searchLog == '') {
-            this.$message.info('文件名不能为空');
+            this.$message.error('文件名不能为空');
             return;
           }
 
@@ -493,7 +553,7 @@
           })
             .then((res) => {
               this.fileContent = '';
-              this.$message.info('文件更新成功');
+              this.$message.success('文件更新成功');
               console.log(res)
             })
         },
