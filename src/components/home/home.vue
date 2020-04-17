@@ -25,7 +25,12 @@
         <a-layout-content
           :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
         >
-            <a-row style="height: 100%;">
+            <div v-if="branch_status === 4">
+              <p>
+                12122
+              </p>
+            </div>
+            <a-row style="height: 100%;" v-else>
               <a-col :span="8" style="overflow: auto; height: 100%; margin-top: 10px;">
 
                 <el-timeline v-if="branch_status === 2">
@@ -34,20 +39,6 @@
                             <h4>svn&nbsp;&nbsp;{{svn_value['revision']}}</h4>
                             <p>{{svn_value['msg']}}</p>
 
-                            <!-- 1111 -->
-                            <!-- <el-select v-model="value" placeholder="CHANGES" style="width: 300px">
-                                <el-option-group
-                                v-for="(select_value, select_id) in svn_value['paths']" :key="select_id"
-                                :label="select_id">
-                                    <el-option
-                                        v-for="k in select_value" :key="k"
-                                        
-                                        :value="k">
-                                    </el-option>
-                                </el-option-group>
-                            </el-select> -->
-
-                            <!-- 2222 -->
                             <el-collapse>
                                 <el-collapse-item v-for="(select_value, select_id) in svn_value['paths']" :key="select_id" :title="select_id">
                                     <div v-for="(v,k) in select_value" :key="k">
@@ -132,22 +123,12 @@
                 <el-timeline>
                     <el-timeline-item placement="top" v-for="(value,index) in task_data" :key="index" :timestamp="value['command']" :type="value['status']">
                         <el-card style="margin-top: 10px;">
-                            <!-- <p v-for="message in value['task_data']" :key="message" style="margin-top: 5px;">{{message}}</p> -->
-
                             <el-timeline-item v-for="(status, time) in value['task_data']" :key="time" :timestamp="time" type="success">
                                 {{status}}
                             </el-timeline-item>
-
                         </el-card>
                     </el-timeline-item>
                 </el-timeline>
-
-
-                <!-- <a-timeline>
-                  <a-timeline-item v-for="(value,index) in task_data" :key="index" :color="value['status']">
-                    <p v-for="message in value['task_data']" :key="message" style="margin-top: 5px;">{{message}}</p>
-                  </a-timeline-item>
-                </a-timeline> -->
               </a-col>
             </a-row>
             
@@ -243,7 +224,8 @@
         item_data: [
           { id: 1, name: 'gen_plist' },
           { id: 2, name: 'svn' },
-          { id: 3, name: 'ftp' }
+          { id: 3, name: 'ftp' },
+          // { id: 4, name: 'notice editor'}
         ],
         collapsed: false,
         branch_data: [],
@@ -257,6 +239,7 @@
         task_data: [],
         svn_log: [],
         time1: '',
+        time2: '',
         zip_type,
         value: ['8','9','11'],
         treeData,
@@ -303,7 +286,7 @@
             })
     },
     mounted: function() {
-      setInterval(this.pullTask, this.Timer.task_refresh_time);
+      this.time2 = setInterval(this.pullTask, this.Timer.task_refresh_time);
     },
     methods: {
         handleChange(value) {
@@ -349,6 +332,7 @@
           }
         },
         setStatus(data) {
+          console.log(data);
           this.branch_status = data;
           if (data == 3) {
             this.ftp_status = 1;
@@ -359,6 +343,11 @@
             this.time1 = setInterval(this.pullSvnlog, this.Timer.svn_log_refresh);
           } else {
             clearInterval(this.time1);
+          }
+
+          if (data == 4) {
+            clearInterval(this.time1);
+            clearInterval(this.time2);
           }
           
         },
@@ -449,16 +438,6 @@
                       arr['status'] = 'danger';
                       break;
               }
-
-            //   if (result[key]['status'] === 0) {
-            //     arr['status'] = 'gray';
-            //   } else if (result[key]['status'] === 1) {
-            //     arr['status'] = 'green';
-            //   } else if (result[key]['status'] === 2) {
-            //     arr['status'] = 'blue';
-            //   } else {
-            //     arr['status'] = 'red';
-            //   }
               
               var command = result[key]['command']['project_name'] + "/" + result[key]['command']['branch_name'] + "/" + 
                 result[key]['command']['command'] + "/" + result[key]['command']['message'] + "/" + result[key]['command']['zip_type'] + "/" +

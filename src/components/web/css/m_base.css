@@ -1,0 +1,40 @@
+@charset "UTF-8";
+/**
+ *
+ * m_base.css
+ *
+ * @authors leiTingGame-Tp
+ * @date    2016-01-22 
+ * @version v2016
+ *
+ */
+ @charset "utf-8";
+* {margin: 0;padding: 0;outline: none;border: 0;}
+body {font-size: .24rem;font-family: "Microsoft YaHei";-webkit-text-size-adjust: none;-webkit-user-select: none;-webkit-tap-highlight-color: transparent;}
+ul,ol,li{ list-style:none;}
+i, em{ font-style:normal;}
+img{ border:none;vertical-align:top;}
+a {text-decoration: none;-webkit-tap-highlight-color: transparent;color:#000;}
+input {outline: none;-webkit-appearance: none;border-radius:0;}
+select:focus{ outline: none;}
+textarea{ outline:none; resize:none;}
+.clearfix:after{content:""; display:block; clear:both;}
+.clearfix{zoom:1;} 
+
+button,optgroup,select,textarea{-webkit-tap-highlight-color:rgba(0,0,0,0);}
+
+.fl{ float:left;}
+.fr{ float:right;}
+.pr { position:relative;}
+.pa { position:absolute;}
+.hid{ display: none !important;}
+
+.bg_auto{ width: 100%;}
+.m_body{ max-width: 640px; margin: 0 auto; box-shadow: 0 0 5px #000;}
+
+/*footer*/
+.footer{ background-color: #000; color: #b1b1b1; line-height: .3rem; text-align: center; padding: .3rem; }
+.footer a{ color: #b1b1b1;}
+
+/*极验调整*/
+.LT_popup .geetest_holder.geetest_wind{ min-width: 246px;}

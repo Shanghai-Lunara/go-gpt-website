@@ -1,0 +1,60 @@
+/*
+   m_paging.css
+   <project>
+   
+   Created by wucj on 2018-11-05.
+   Copyright 2018 wucj. All rights reserved.
+*/
+
+.conts{ min-height: 11rem;}
+
+/*列表页*/
+.news_list{ margin: 0 auto; padding-top: .12rem;}
+.news_list .cont{ }
+.news_list .cont dl{ border-bottom: 1px solid #e5e5e5; padding:.3rem 0;}
+.news_list .cont dl dt{ padding: 0 .18rem 0 .4rem;}
+.news_list .cont dl dt h3{ width: .26rem; height: .6rem; background:url(../images/paging/t.png) left top/100% 100% no-repeat;}
+.news_list .cont dl dd{ width: 5.6rem;}
+.news_list .cont dl dd h3{ color: #3f3f3f; font-weight: normal; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding-bottom: .1rem;}
+.news_list .cont dl dd p{ color: #8b8b8b; line-height: .3rem;
+	text-overflow: -o-ellipsis-lastline;
+  	overflow: hidden;
+  	text-overflow: ellipsis;
+  	display: -webkit-box;
+  	-webkit-line-clamp: 2;
+  	line-clamp: 2;
+  	-webkit-box-orient: vertical;
+}
+
+/*分页*/
+.page_box{ text-align: center; padding-top: .3rem;}
+.pages { margin: 0 auto 0; display: inline-block;}
+.pages a{ color: #aaaaaa; margin-right: .15rem; width: .5rem; height: .5rem; line-height: .5rem; display: block; float: left; position: relative;}
+.pages a:after{ content: ''; position: absolute; left: .06rem; top: .06rem; width: .34rem; height:.34rem; border: 1px solid #aaaaaa; border-radius: .03rem;
+	transform: rotate(-45deg);
+	-webkit-transform: rotate(-45deg);
+}
+.pages a:hover{ color: #ccba7c; }
+.pages a:hover:after{ border-color: #ccba7c; }
+.pages a.active{ color: #ccba7c; }
+.pages a.active:after{ border-color: #ccba7c; }
+
+/*内页*/
+.news_details{ }
+.news_details .news_back{ height: .66rem; line-height: .66rem; border-bottom: 1px solid #f0f0f2; background: #fff;}
+.news_details .news_back a{ display: block; width: 100%; height: 100%; color: #b7b7b7;}
+.news_details .news_back i{ background: url(../images/paging/back.png) 0 0/100% 100% no-repeat; width: .15rem; height: .26rem; display: inline-block; margin: 0 .12rem 0 .27rem; vertical-align: middle;}
+.news_details .news_title{ border-bottom: .02rem dashed #d3d3d3; padding-bottom: .2rem; margin: 0 .32rem; }
+.news_details .news_title strong{border-left: .05rem solid #ff6b16; font-size: .32rem; color: #4f2863; padding-left: .1rem; line-height: .77rem; margin-left: .12rem;}
+.news_details .news_title span{ color: #ac989c; display: block; padding-left: .15rem; color: #b7b7b7; font-weight: normal;}
+/*.news_details .news_title .back{ display: block; width: 45px; height: 39px; right: 0; top:0; background-position: 0 0;}*/
+.news_details .news_title .back:hover{ background-position: 0 -39px;}
+
+.news_details .news_cont{color:#ac989c; margin: 0 .32rem; }
+.news_details .news_cont .title{text-align: left;padding: .47rem 0 .43rem .36rem;}
+.news_details .news_cont .cont{
+}
+
+.news_details .news_cont .cont::-webkit-scrollbar { width: 2px; }
+.news_details .news_cont .cont::-webkit-scrollbar-thumb { background: #1e1d1e;}
+.news_details .news_cont .cont::-webkit-scrollbar-track { background: #242325;}
