@@ -25,12 +25,10 @@
         <a-layout-content
           :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
         >
-            <div v-if="branch_status === 4">
-              <p>
-                12122
-              </p>
+            <div style="height: 600px;" v-if="branch_status === 4">
+              <editor></editor>
             </div>
-            <a-row style="height: 100%;" v-else>
+            <a-row style="height: 100%;" v-if="branch_status !== 4">
               <a-col :span="8" style="overflow: auto; height: 100%; margin-top: 10px;">
 
                 <el-timeline v-if="branch_status === 2">
@@ -141,6 +139,7 @@
 <script>
   import popout from '../popout';
   import { TreeSelect } from 'ant-design-vue';
+  import editor from '../editor/editor';
 
   const SHOW_PARENT = TreeSelect.SHOW_PARENT;
 
@@ -225,7 +224,7 @@
           { id: 1, name: 'gen_plist' },
           { id: 2, name: 'svn' },
           { id: 3, name: 'ftp' },
-          // { id: 4, name: 'notice editor'}
+          { id: 4, name: 'notice editor'}
         ],
         collapsed: false,
         branch_data: [],
@@ -256,6 +255,7 @@
     },
     components: {
       popout,
+      editor,
     },
     created: function () {
       // 拉取分支
