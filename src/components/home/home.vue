@@ -26,7 +26,7 @@
           :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }"
         >
             <div style="height: 600px;" v-if="branch_status === 4">
-              <editor></editor>
+              <editor ref="notice"></editor>
             </div>
             <a-row style="height: 100%;" v-if="branch_status !== 4">
               <a-col :span="8" style="overflow: auto; height: 100%; margin-top: 10px;">
@@ -332,7 +332,6 @@
           }
         },
         setStatus(data) {
-          console.log(data);
           this.branch_status = data;
           if (data == 3) {
             this.ftp_status = 1;
@@ -348,6 +347,9 @@
           if (data == 4) {
             clearInterval(this.time1);
             clearInterval(this.time2);
+            this.$nextTick(() => {
+              this.$refs.notice.name = this.project_name;
+            })
           }
           
         },

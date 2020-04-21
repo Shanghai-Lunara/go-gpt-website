@@ -1,6 +1,13 @@
 <template>
   <div class="edit_container" style="height: 700px;">
-    <el-input v-model="input" placeholder="请输入标题" style="width: 400px;"></el-input>
+    <el-select  v-model="value" placeholder="请选择分支" style="width: 200px;" @change="getContent">
+        <el-option
+        v-for="(v, k) in list"
+        :key="k"
+        :value="k">
+        </el-option>
+    </el-select>
+    <el-input v-model="input" placeholder="请输入标题" style="width: 500px;margin-left: 10px;"></el-input>
     <quill-editor 
         v-model="content"
         ref="myQuillEditor"
@@ -14,42 +21,55 @@
 </template> 
 <script>
 export default {
-    name: 'App',
     data(){
         return {
-        content: '',
-        input: '',
-        editorOption: {
-            modules:{
-                toolbar:[
-                ['bold', 'italic', 'underline', 'strike'], //加粗，斜体，下划线，删除线
-                ['blockquote', 'code-block'],  //引用，代码块
+            content: '',
+            input: '',
+            name: '',
+            list: '',
+            value: '',
+            branch: '',
+            editorOption: {
+                modules:{
+                    toolbar:[
+                    ['bold', 'italic', 'underline', 'strike'], //加粗，斜体，下划线，删除线
+                    ['blockquote', 'code-block'],  //引用，代码块
 
 
-                [{ 'header': 1 }, { 'header': 2 }],  // 标题，键值对的形式；1、2表示字体大小
-                [{ 'list': 'ordered'}, { 'list': 'bullet' }],  //列表
-                [{ 'script': 'sub'}, { 'script': 'super' }], // 上下标
-                [{ 'indent': '-1'}, { 'indent': '+1' }],  // 缩进
-                [{ 'direction': 'rtl' }],    // 文本方向  
+                    [{ 'header': 1 }, { 'header': 2 }],  // 标题，键值对的形式；1、2表示字体大小
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],  //列表
+                    [{ 'script': 'sub'}, { 'script': 'super' }], // 上下标
+                    [{ 'indent': '-1'}, { 'indent': '+1' }],  // 缩进
+                    [{ 'direction': 'rtl' }],    // 文本方向  
 
-                [{ 'size': ['small', false, 'large', 'huge', '24px'] }], // 字体大小
-                [{ 'header': [1, 2, 3, 4, 5, 6, false] }],  //几级标题
-
-
-                [{ 'color': [] }, { 'background': [] }],  // 字体颜色，字体背景颜色
-                [{ 'font': [] }],  //字体
-                [{ 'align': [] }], //对齐方式
+                    [{ 'size': ['small', false, 'large', 'huge', '24px'] }], // 字体大小
+                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],  //几级标题
 
 
-                ['clean'], //清除字体样式
-                ]
-            },
-            theme:'snow'
+                    [{ 'color': [] }, { 'background': [] }],  // 字体颜色，字体背景颜色
+                    [{ 'font': [] }],  //字体
+                    [{ 'align': [] }], //对齐方式
+
+
+                    ['clean'], //清除字体样式
+                    ]
+                },
+                theme:'snow'
+            }
         }
-        }
+    },
+    mounted: function() {
+        this.$nextTick(() => {
+                this.$get('/oss/envs/' + this.name).then((res) => {
+                        this.list = res.data;
+                        console.log(res)
+                    })
+            })
+        
     },
     computed: {
         editor() {
+            console.log(2222)
             return this.$refs.myQuillEditor.quill;
         },
     },
@@ -67,7 +87,28 @@ export default {
             // console.log(44444)
         }, 
         saveHtml() {
-            console.log(this.content)
+            // console.log(this.content)
+            // console.log(this.name)
+            this.$post('/oss/update', {
+            'project_name' : this.name,
+            'env' : this.branch,
+            'title' : this.input,
+            'content' : this.content
+          })
+            .then((res) => {
+              this.$message.success('生成公告成功');
+                window.open(this.list[this.branch], '_blank');
+              console.log(res)
+            })
+        },
+        getContent(value) {
+            console.log(value);
+            this.branch = value;
+            this.$get('/oss/content/' + this.name + '/' + value).then((res) => {
+                    this.content = res.data.content;
+                    this.input = res.data.title;
+                    console.log(res)
+                })
         }
     }
 }
