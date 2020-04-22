@@ -445,8 +445,6 @@
                 result[key]['command']['command'] + "/" + result[key]['command']['message'] + "/" + result[key]['command']['zip_type'] + "/" +
                 result[key]['command']['zip_flags'];
 
-            //   arr['task_data'] = result[key]['message'];
-            //   console.log(result[key]['message'])
               var message = result[key]['message'];
               var list = {};
               for (var index = 0; index < message.length; index++) {
@@ -454,7 +452,7 @@
                   var time = message[index].slice(0, num + 1);
                   list[time] = message[index].slice(num + 2)
               }
-            //   console.log(list)
+
               arr['task_data'] = list
               arr['command'] = command;
               this.task_data.unshift(arr);

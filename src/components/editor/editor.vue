@@ -87,22 +87,29 @@ export default {
             // console.log(44444)
         }, 
         saveHtml() {
-            // console.log(this.content)
-            // console.log(this.name)
+            if (this.input == '') {
+                this.$message.error('公告标题不能为空');
+                return;
+            }
+
+            if (this.content == '') {
+                this.$message.error('公告内容不能为空');
+                return;
+            }
+
             this.$post('/oss/update', {
-            'project_name' : this.name,
+            'projectName' : this.name,
             'env' : this.branch,
             'title' : this.input,
             'content' : this.content
           })
             .then((res) => {
-              this.$message.success('生成公告成功');
+                this.$message.success('生成公告成功');
                 window.open(this.list[this.branch], '_blank');
-              console.log(res)
+                console.log(res)
             })
         },
         getContent(value) {
-            console.log(value);
             this.branch = value;
             this.$get('/oss/content/' + this.name + '/' + value).then((res) => {
                     this.content = res.data.content;
