@@ -69,7 +69,6 @@ export default {
     },
     computed: {
         editor() {
-            console.log(2222)
             return this.$refs.myQuillEditor.quill;
         },
     },
@@ -104,6 +103,7 @@ export default {
             'content' : this.content
           })
             .then((res) => {
+                this.content = '';
                 this.$message.success('生成公告成功');
                 window.open(this.list[this.branch], '_blank');
                 console.log(res)
