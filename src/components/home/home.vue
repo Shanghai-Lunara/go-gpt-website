@@ -209,6 +209,16 @@
       value: '12',
       key: '12',
     },
+    {
+      title: 'amberpvp',
+      value: '13',
+      key: '13',
+    },
+    {
+      title: 'maskword',
+      value: '14',
+      key: '14',
+    },
   ];
 
   const zip_type = [
